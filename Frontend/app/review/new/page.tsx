@@ -2,23 +2,56 @@
 
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { Send, Layout, Database, Network, Cpu, CheckCircle2, ChevronRight, AlertTriangle } from "lucide-react"
+import { Send, Layout, Database, Network, Cpu, CheckCircle2, ChevronRight, AlertTriangle, Sparkles, Loader2, RefreshCcw } from "lucide-react"
 import Navbar from "@/components/Navbar"
 import { cn } from "@/lib/utils"
+import { createDecision, Decision, CreateDecisionRequest } from "@/lib/api"
+import Link from "next/link"
 
 export default function NewReviewPage() {
     const [step, setStep] = useState(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [showResult, setShowResult] = useState(false)
+    const [result, setResult] = useState<Decision | null>(null)
+    const [formData, setFormData] = useState<CreateDecisionRequest>({
+        title: "",
+        architecture: "",
+        api_design: "",
+        data_model: "",
+        tech_stack: "",
+        tech_choices: [],
+    })
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target
+        setFormData(prev => ({ ...prev, [name]: value }))
+    }
+
+    const toggleTechChoice = (tech: string) => {
+        setFormData(prev => ({
+            ...prev,
+            tech_choices: prev.tech_choices.includes(tech)
+                ? prev.tech_choices.filter(t => t !== tech)
+                : [...prev.tech_choices, tech]
+        }))
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        if (!formData.title) {
+            alert("Please provide a project title.")
+            setStep(1)
+            return
+        }
         setIsSubmitting(true)
-        // Simulate AI processing
-        setTimeout(() => {
+        try {
+            const data = await createDecision(formData)
+            setResult(data)
+        } catch (err) {
+            console.error("Submission failed:", err)
+            alert("Failed to submit review. Please ensure the backend is running.")
+        } finally {
             setIsSubmitting(false)
-            setShowResult(true)
-        }, 2500)
+        }
     }
 
     const steps = [
@@ -33,7 +66,7 @@ export default function NewReviewPage() {
             <Navbar />
 
             <div className="pt-32 pb-20 px-6 max-w-4xl mx-auto">
-                {!showResult ? (
+                {!result ? (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -69,14 +102,21 @@ export default function NewReviewPage() {
                                             <label className="text-sm font-medium text-slate-300">Project Title</label>
                                             <input
                                                 type="text"
+                                                name="title"
+                                                value={formData.title}
+                                                onChange={handleInputChange}
                                                 placeholder="e.g. Next-Gen Real-time Analytics System"
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all"
+                                                required
                                             />
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-sm font-medium text-slate-300">Architecture Description</label>
                                             <textarea
                                                 rows={8}
+                                                name="architecture"
+                                                value={formData.architecture}
+                                                onChange={handleInputChange}
                                                 placeholder="Describe the overall system architecture, service communication patterns, and high-level components..."
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all resize-none"
                                             />
@@ -94,6 +134,9 @@ export default function NewReviewPage() {
                                             <label className="text-sm font-medium text-slate-300">API Design & Patterns</label>
                                             <textarea
                                                 rows={10}
+                                                name="api_design"
+                                                value={formData.api_design}
+                                                onChange={handleInputChange}
                                                 placeholder="Define major endpoints, authentication strategies, and communication protocols (REST, GraphQl, gRPC)..."
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all resize-none"
                                             />
@@ -111,6 +154,9 @@ export default function NewReviewPage() {
                                             <label className="text-sm font-medium text-slate-300">Data Models & Schema</label>
                                             <textarea
                                                 rows={10}
+                                                name="data_model"
+                                                value={formData.data_model}
+                                                onChange={handleInputChange}
                                                 placeholder="Describe key entities, relationships, and indexing strategies..."
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all resize-none"
                                             />
@@ -128,9 +174,18 @@ export default function NewReviewPage() {
                                             {['Microservices', 'Serverless', 'Event-Driven', 'Monolithic', 'Cloud Native', 'On-Premise'].map((tech) => (
                                                 <div
                                                     key={tech}
-                                                    className="p-4 rounded-2xl glass-hover border border-white/10 flex items-center gap-3 cursor-pointer group"
+                                                    onClick={() => toggleTechChoice(tech)}
+                                                    className={cn(
+                                                        "p-4 rounded-2xl border transition-all flex items-center gap-3 cursor-pointer group",
+                                                        formData.tech_choices.includes(tech)
+                                                            ? "bg-primary/20 border-primary/50 shadow-[0_0_15px_rgba(124,58,237,0.2)]"
+                                                            : "bg-white/5 border-white/10 hover:border-white/20"
+                                                    )}
                                                 >
-                                                    <div className="w-4 h-4 rounded-full border border-primary/50 group-hover:bg-primary transition-colors" />
+                                                    <div className={cn(
+                                                        "w-4 h-4 rounded-full border transition-colors",
+                                                        formData.tech_choices.includes(tech) ? "bg-primary border-primary" : "border-primary/50"
+                                                    )} />
                                                     <span className="text-sm font-medium">{tech}</span>
                                                 </div>
                                             ))}
@@ -139,6 +194,9 @@ export default function NewReviewPage() {
                                             <label className="text-sm font-medium text-slate-300">Additional Tech Stack Details</label>
                                             <input
                                                 type="text"
+                                                name="tech_stack"
+                                                value={formData.tech_stack}
+                                                onChange={handleInputChange}
                                                 placeholder="Language, Database, Cloud Provider..."
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all"
                                             />
@@ -170,12 +228,12 @@ export default function NewReviewPage() {
                                 ) : (
                                     <button
                                         type="submit"
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || !formData.title}
                                         className="px-10 py-3 rounded-2xl bg-primary text-white font-bold flex items-center gap-2 hover:bg-primary/90 transition-all disabled:opacity-50"
                                     >
                                         {isSubmitting ? (
                                             <>
-                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                <Loader2 className="w-5 h-5 animate-spin" />
                                                 Analyzing...
                                             </>
                                         ) : (
@@ -207,7 +265,7 @@ export default function NewReviewPage() {
                                     <AlertTriangle className="text-amber-500 w-6 h-6" />
                                     <h3 className="font-bold text-xl">High Risks</h3>
                                 </div>
-                                <div className="text-3xl font-bold mb-1">2</div>
+                                <div className="text-3xl font-bold mb-1">{result.ai_feedback?.high_risks || 0}</div>
                                 <p className="text-slate-400 text-sm">Potential bottlenecks detected</p>
                             </div>
                             <div className="glass p-8 rounded-3xl border-l-4 border-blue-500">
@@ -215,16 +273,16 @@ export default function NewReviewPage() {
                                     <Network className="text-blue-500 w-6 h-6" />
                                     <h3 className="font-bold text-xl">Scalability</h3>
                                 </div>
-                                <div className="text-3xl font-bold mb-1">Moderate</div>
-                                <p className="text-slate-400 text-sm">Growth potential is stable</p>
+                                <div className="text-3xl font-bold mb-1">{result.ai_feedback?.scalability || "In Beta"}</div>
+                                <p className="text-slate-400 text-sm">Growth potential analysis</p>
                             </div>
                             <div className="glass p-8 rounded-3xl border-l-4 border-emerald-500">
                                 <div className="flex items-center gap-3 mb-4">
                                     <CheckCircle2 className="text-emerald-500 w-6 h-6" />
-                                    <h3 className="font-bold text-xl">Maintainability</h3>
+                                    <h3 className="font-bold text-xl">Review Status</h3>
                                 </div>
-                                <div className="text-3xl font-bold mb-1">Good</div>
-                                <p className="text-slate-400 text-sm">Foundations are decoupled</p>
+                                <div className="text-3xl font-bold mb-1 capitalize">{result.status}</div>
+                                <p className="text-slate-400 text-sm">Final decision outcome</p>
                             </div>
                         </div>
 
@@ -237,40 +295,49 @@ export default function NewReviewPage() {
                                     Key Insights
                                 </h3>
                                 <div className="space-y-4">
-                                    {[
-                                        "Detected potential tight coupling between User Service and Billing Service via direct API calls. Recommend switching to an Event-Driven pattern.",
-                                        "The proposed data schema for Analytics might face performance issues at scale. Consider using a partitioned table or a specialized Time-Series database.",
-                                        "Authentication flow lacks a refresh token mechanism, which could lead to poor UX once access tokens expire."
-                                    ].map((insight, i) => (
+                                    {result.ai_feedback?.insights.map((insight, i) => (
                                         <div key={i} className="p-4 rounded-2xl bg-white/5 border border-white/5 flex gap-4">
                                             <div className="mt-1 w-2 h-2 rounded-full bg-primary shrink-0" />
                                             <p className="text-slate-300 leading-relaxed">{insight}</p>
                                         </div>
-                                    ))}
+                                    )) || (
+                                            <p className="text-slate-500 italic">No specific insights generated for this design yet.</p>
+                                        )}
                                 </div>
                             </section>
 
-                            <section className="pt-8 border-t border-white/5">
-                                <h4 className="font-bold mb-4 uppercase tracking-widest text-xs text-slate-500">Suggested Action Plan</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-                                        <h5 className="font-bold text-emerald-500 mb-2">Immediate Fix</h5>
-                                        <p className="text-sm text-slate-400">Implement an asynchronous message queue (RabbitMQ/Kafka) for cross-service communication.</p>
+                            {result.ai_feedback?.action_plan && (
+                                <section className="pt-8 border-t border-white/5">
+                                    <h4 className="font-bold mb-4 uppercase tracking-widest text-xs text-slate-500">Suggested Action Plan</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {result.ai_feedback.action_plan.map((item, i) => (
+                                            <div key={i} className={cn(
+                                                "p-6 rounded-2xl border",
+                                                item.category === "Immediate Fix" ? "bg-rose-500/10 border-rose-500/20" : "bg-blue-500/10 border-blue-500/20"
+                                            )}>
+                                                <h5 className={cn(
+                                                    "font-bold mb-2",
+                                                    item.category === "Immediate Fix" ? "text-rose-500" : "text-blue-500"
+                                                )}>{item.category}</h5>
+                                                <p className="text-sm text-slate-400">{item.description}</p>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="p-6 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-                                        <h5 className="font-bold text-blue-500 mb-2">Optimization</h5>
-                                        <p className="text-sm text-slate-400">Refactor the 'orders' collection to use sharding based on user_id for better load distribution.</p>
-                                    </div>
-                                </div>
-                            </section>
+                                </section>
+                            )}
 
-                            <div className="flex justify-center pt-10">
+                            <div className="flex flex-col md:flex-row items-center justify-center gap-4 pt-10">
                                 <button
-                                    onClick={() => setShowResult(false)}
-                                    className="px-8 py-3 rounded-2xl bg-white/5 border border-white/10 font-bold hover:bg-white/10 transition-all"
+                                    onClick={() => setResult(null)}
+                                    className="w-full md:w-auto px-8 py-3 rounded-2xl bg-white/5 border border-white/10 font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                                 >
-                                    Perform Another Review
+                                    <RefreshCcw className="w-4 h-4" /> Perform Another Review
                                 </button>
+                                <Link href={`/dashboard/${result.id}`} className="w-full md:w-auto">
+                                    <button className="w-full px-8 py-3 rounded-2xl bg-primary text-white font-bold hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-all">
+                                        View Full Report
+                                    </button>
+                                </Link>
                             </div>
                         </div>
                     </motion.div>
@@ -279,25 +346,5 @@ export default function NewReviewPage() {
 
             <div className="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none -z-10" />
         </main>
-    )
-}
-
-function Sparkles({ className }: { className?: string }) {
-    return (
-        <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={className}
-        >
-            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-            <path d="M5 3v4" />
-            <path d="M19 17v4" />
-            <path d="M3 5h4" />
-            <path d="M17 19h4" />
-        </svg>
     )
 }
