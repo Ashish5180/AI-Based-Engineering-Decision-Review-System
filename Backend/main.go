@@ -5,11 +5,17 @@ import (
 	"os"
 
 	"github.com/ashish5180/ai-decision-review/internal/config"
+	"github.com/ashish5180/ai-decision-review/internal/logger"
 	"github.com/ashish5180/ai-decision-review/internal/server"
 )
 
 func main() {
+	// Initialize structured logging
+	logger.Init("ai-decision-review", logger.INFO)
+	l := logger.Default()
+
 	cfg := config.Load()
+	l.Info("Configuration loaded successfully")
 
 	port := os.Getenv("PORT")
 	if port == "" {

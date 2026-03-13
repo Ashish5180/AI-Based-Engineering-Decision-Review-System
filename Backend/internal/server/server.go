@@ -17,32 +17,41 @@ type Server struct {
 
 // New initializes the server with all dependencies wired together.
 func New(cfg *config.Config) (*Server, error) {
-	// Initialize DynamoDB store
-	dynamo, err := store.NewDynamoStore(cfg)
+	// Initialize MongoDB store
+	mongo, err := store.NewMongoStore(cfg)
 	if err != nil {
 		return nil, err
 	}
 
 	// Initialize AI client
-	gemini := ai.NewGeminiClient(cfg.GeminiAPIKey)
+	openaiClient := ai.NewOpenAIClient(cfg.OpenAIAPIKey)
 
 	// Initialize handlers
-	decisionHandler := handler.NewDecisionHandler(dynamo, gemini)
+	decisionHandler := handler.NewDecisionHandler(mongo, openaiClient)
+	patternHandler := handler.NewPatternHandler(mongo, openaiClient)
 
 	// Setup routes
 	mux := http.NewServeMux()
 
-	// Health
+	// Health & Readiness
 	mux.HandleFunc("GET /api/health", handler.HealthCheck)
+	mux.HandleFunc("GET /api/ready", handler.ReadinessCheck)
+	mux.HandleFunc("GET /api/metrics", middleware.MetricsHandler)
 
 	// Decisions
 	mux.HandleFunc("POST /api/decisions", decisionHandler.CreateDecision)
 	mux.HandleFunc("GET /api/decisions", decisionHandler.ListDecisions)
 	mux.HandleFunc("GET /api/decisions/{id}", decisionHandler.GetDecision)
 
-	// Apply middleware chain: Logger → CORS → Router
+	// Patterns
+	mux.HandleFunc("GET /api/patterns", patternHandler.ListPatterns)
+	mux.HandleFunc("GET /api/patterns/{id}", patternHandler.GetPattern)
+	mux.HandleFunc("POST /api/patterns/tailor", patternHandler.TailorPattern)
+
+	// Apply middleware chain: Logger → Metrics → CORS → Router
 	var h http.Handler = mux
 	h = middleware.CORS(h)
+	h = middleware.Metrics(h)
 	h = middleware.Logger(h)
 
 	return &Server{handler: h}, nil

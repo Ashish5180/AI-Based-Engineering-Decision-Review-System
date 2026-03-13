@@ -4,18 +4,18 @@ import "os"
 
 // Config holds all application configuration loaded from environment variables.
 type Config struct {
-	AWSRegion    string
-	DynamoTable  string
-	GeminiAPIKey string
+	MongoURI     string
+	MongoDB      string
+	OpenAIAPIKey string
 }
 
 // Load reads environment variables and returns a Config.
 // Defaults are provided for local development.
 func Load() *Config {
 	return &Config{
-		AWSRegion:    getEnv("AWS_REGION", "us-east-1"),
-		DynamoTable:  getEnv("DYNAMO_TABLE", "Decisions"),
-		GeminiAPIKey: getEnv("GEMINI_API_KEY", ""),
+		MongoURI:     getEnv("MONGO_URI", "mongodb://localhost:27017"),
+		MongoDB:      getEnv("MONGO_DB", "ai_decision_review"),
+		OpenAIAPIKey: getEnv("OPENAI_API_KEY", ""),
 	}
 }
 

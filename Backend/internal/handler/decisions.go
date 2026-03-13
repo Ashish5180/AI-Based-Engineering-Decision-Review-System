@@ -15,15 +15,15 @@ import (
 
 // DecisionHandler handles all /api/decisions endpoints.
 type DecisionHandler struct {
-	store  *store.DynamoStore
-	gemini *ai.GeminiClient
+	store  *store.MongoStore
+	openai *ai.OpenAIClient
 }
 
 // NewDecisionHandler creates a new handler with all dependencies.
-func NewDecisionHandler(s *store.DynamoStore, g *ai.GeminiClient) *DecisionHandler {
+func NewDecisionHandler(s *store.MongoStore, o *ai.OpenAIClient) *DecisionHandler {
 	return &DecisionHandler{
 		store:  s,
-		gemini: g,
+		openai: o,
 	}
 }
 
@@ -62,7 +62,7 @@ func (h *DecisionHandler) CreateDecision(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Call AI analysis (synchronous for MVP — Phase 1)
-	feedback, err := h.gemini.AnalyzeDecision(r.Context(), decision)
+	feedback, err := h.openai.AnalyzeDecision(r.Context(), decision)
 	if err != nil {
 		log.Printf("WARN AI analysis failed: %v", err)
 		decision.Status = "failed"
