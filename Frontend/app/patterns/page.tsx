@@ -2,26 +2,309 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { BookOpen, Code2, Layers, Cpu, Database, Network, ShieldCheck, Zap, Sparkles, Loader2, X, CheckCircle2 } from "lucide-react"
+import {
+    BookOpen, Code2, Layers, Network, Database,
+    ShieldCheck, Zap, Sparkles, Loader2, X, CheckCircle2,
+} from "lucide-react"
 import Navbar from "@/components/Navbar"
 import { listPatterns, tailorPattern, Pattern, PatternTailoredResponse } from "@/lib/api"
 import MarkdownRenderer from "@/components/MarkdownRenderer"
-import { cn } from "@/lib/utils"
 
-const iconMap: Record<string, any> = {
-    Network,
-    Database,
-    Zap,
-    ShieldCheck,
+// ─── Palette ──────────────────────────────────────────────────────────────────
+const p = {
+    purple50: "#EEEDFE",
+    purple100: "#CECBF6",
+    purple200: "#AFA9EC",
+    purple600: "#534AB7",
+    purple800: "#3C3489",
+    green50: "#EAF3DE",
+    green600: "#3B6D11",
+    red50: "#FCEBEB",
+    red600: "#A32D2D",
+    amber50: "#FAEEDA",
+    amber600: "#854F0B",
+    blue50: "#E6F1FB",
+    blue600: "#185FA5",
 }
 
+const iconMap: Record<string, React.ElementType> = {
+    Network, Database, Zap, ShieldCheck,
+}
+
+// ─── Difficulty badge ─────────────────────────────────────────────────────────
+function DifficultyBadge({ level }: { level: string }) {
+    const styles: Record<string, { bg: string; color: string; border: string }> = {
+        Beginner: { bg: p.green50, color: p.green600, border: "#C0DD97" },
+        Intermediate: { bg: p.amber50, color: p.amber600, border: "#FAC775" },
+        Advanced: { bg: p.red50, color: p.red600, border: "#F7C1C1" },
+    }
+    const s = styles[level] ?? styles.Intermediate
+    return (
+        <span
+            className="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest border"
+            style={{ background: s.bg, color: s.color, borderColor: s.border }}
+        >
+            {level}
+        </span>
+    )
+}
+
+// ─── Pattern Card ─────────────────────────────────────────────────────────────
+function PatternCard({
+    pattern,
+    index,
+    onSelect,
+}: {
+    pattern: Pattern
+    index: number
+    onSelect: (p: Pattern) => void
+}) {
+    const Icon = iconMap[pattern.icon] ?? Network
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.07 }}
+            className="flex flex-col h-full bg-white border border-black/[0.06] rounded-2xl p-6 hover:border-black/[0.12] hover:shadow-sm transition-all group"
+        >
+            {/* Icon + badge row */}
+            <div className="flex items-start justify-between mb-6">
+                <div
+                    className="flex items-center justify-center rounded-xl transition-all group-hover:opacity-90"
+                    style={{ width: 44, height: 44, background: p.purple50, border: `0.5px solid ${p.purple100}` }}
+                >
+                    <Icon size={20} color={p.purple600} strokeWidth={1.8} />
+                </div>
+                <DifficultyBadge level={pattern.difficulty} />
+            </div>
+
+            <h3 className="text-[18px] font-semibold text-gray-900 mb-1 leading-snug">{pattern.title}</h3>
+            <p
+                className="text-[11px] font-semibold uppercase tracking-widest mb-5"
+                style={{ color: p.purple600 }}
+            >
+                {pattern.category}
+            </p>
+
+            <div className="space-y-4 flex-grow">
+                {/* Problem */}
+                <div>
+                    <p className="flex items-center gap-1.5 text-[12px] font-semibold mb-2" style={{ color: p.red600 }}>
+                        <Code2 size={13} strokeWidth={2} /> The problem
+                    </p>
+                    <p
+                        className="text-[13px] text-gray-500 leading-relaxed italic border-l-2 pl-3"
+                        style={{ borderColor: "#F7C1C1" }}
+                    >
+                        "{pattern.problem}"
+                    </p>
+                </div>
+
+                {/* Solution */}
+                <div>
+                    <p className="flex items-center gap-1.5 text-[12px] font-semibold mb-2" style={{ color: p.green600 }}>
+                        <Layers size={13} strokeWidth={2} /> Recommended solution
+                    </p>
+                    <p className="text-[13px] text-gray-600 leading-relaxed">{pattern.solution}</p>
+                </div>
+            </div>
+
+            <button
+                onClick={() => onSelect(pattern)}
+                className="mt-8 w-full py-3 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 border transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{
+                    background: p.purple50,
+                    color: p.purple600,
+                    borderColor: p.purple100,
+                }}
+            >
+                <Sparkles size={14} strokeWidth={2} /> Tailor to my tech stack
+            </button>
+        </motion.div>
+    )
+}
+
+// ─── Best-practice card ───────────────────────────────────────────────────────
+function BestPracticeCard({ text, index }: { text: string; index: number }) {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.07 }}
+            className="flex gap-3 p-4 rounded-xl border border-black/[0.06] bg-gray-50 hover:border-green-200 transition-colors"
+        >
+            <div
+                className="flex items-center justify-center rounded-full shrink-0 mt-0.5"
+                style={{ width: 20, height: 20, background: p.green50, border: `0.5px solid #C0DD97` }}
+            >
+                <CheckCircle2 size={11} color={p.green600} strokeWidth={2} />
+            </div>
+            <MarkdownRenderer content={text} className="text-[13px] text-gray-600 leading-relaxed" />
+        </motion.div>
+    )
+}
+
+// ─── Modal ────────────────────────────────────────────────────────────────────
+function TailorModal({
+    pattern,
+    onClose,
+}: {
+    pattern: Pattern
+    onClose: () => void
+}) {
+    const [techStack, setTechStack] = useState("")
+    const [tailoring, setTailoring] = useState(false)
+    const [result, setResult] = useState<PatternTailoredResponse | null>(null)
+
+    const handleTailor = async () => {
+        if (!techStack) return
+        setTailoring(true)
+        setResult(null)
+        try {
+            const data = await tailorPattern(pattern.id, techStack)
+            setResult(data)
+        } catch (err) {
+            console.error("Tailoring failed:", err)
+            alert("Pattern tailoring failed. Please ensure the backend is running.")
+        } finally {
+            setTailoring(false)
+        }
+    }
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            {/* Backdrop */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={onClose}
+                className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            />
+
+            {/* Sheet */}
+            <motion.div
+                initial={{ opacity: 0, y: 24, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 16, scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 320, damping: 28 }}
+                className="relative w-full max-w-3xl bg-white rounded-3xl border border-black/[0.07] shadow-xl max-h-[92vh] overflow-y-auto"
+            >
+                {/* Close */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-5 right-5 p-2 rounded-full hover:bg-gray-100 transition-colors z-20"
+                >
+                    <X size={18} color="#9CA3AF" strokeWidth={2} />
+                </button>
+
+                <div className="p-7 md:p-10">
+                    {/* Modal header */}
+                    <div className="mb-7 pb-7 border-b border-black/[0.06]">
+                        <div
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-widest mb-4 border"
+                            style={{ background: p.purple50, color: p.purple600, borderColor: p.purple100 }}
+                        >
+                            <Sparkles size={11} strokeWidth={2} /> AI Implementation Assistant
+                        </div>
+                        <h2 className="text-[26px] font-semibold text-gray-900 leading-tight tracking-tight mb-2">
+                            Tailor: {pattern.title}
+                        </h2>
+                        <p className="text-[14px] text-gray-500 leading-relaxed max-w-lg">
+                            Adapt this pattern to your specific technology stack with bespoke AI architectural analysis.
+                        </p>
+                    </div>
+
+                    {/* Input row */}
+                    <div className="mb-8">
+                        <label className="block text-[11px] font-semibold uppercase tracking-widest text-gray-400 mb-2.5">
+                            Your tech stack
+                        </label>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <input
+                                type="text"
+                                value={techStack}
+                                onChange={(e) => setTechStack(e.target.value)}
+                                onKeyDown={(e) => e.key === "Enter" && handleTailor()}
+                                placeholder="e.g. Next.js, FastAPI, PostgreSQL, Redis"
+                                className="flex-grow border border-black/[0.1] rounded-xl px-4 py-3 text-[13px] text-gray-800 placeholder:text-gray-300 focus:outline-none focus:border-purple-300 transition-colors font-mono"
+                            />
+                            <button
+                                disabled={!techStack || tailoring}
+                                onClick={handleTailor}
+                                className="px-6 py-3 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] shrink-0"
+                                style={{ background: p.purple600 }}
+                            >
+                                {tailoring ? (
+                                    <><Loader2 size={15} className="animate-spin" /> Analysing…</>
+                                ) : (
+                                    <><Sparkles size={14} strokeWidth={2} /> Tailor pattern</>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Result */}
+                    <AnimatePresence>
+                        {result && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="space-y-10"
+                            >
+                                {/* Implementation */}
+                                <div>
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div
+                                            className="flex items-center justify-center rounded-xl"
+                                            style={{ width: 36, height: 36, background: p.purple50, border: `0.5px solid ${p.purple100}` }}
+                                        >
+                                            <Code2 size={16} color={p.purple600} strokeWidth={1.8} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[15px] font-semibold text-gray-900">Implementation strategy</p>
+                                            <p className="text-[12px] text-gray-400">Tailored for your stack</p>
+                                        </div>
+                                    </div>
+                                    <div className="rounded-xl border border-black/[0.06] bg-gray-50 p-4">
+                                        <MarkdownRenderer content={result.implementation} />
+                                    </div>
+                                </div>
+
+                                {/* Best practices */}
+                                <div>
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div
+                                            className="flex items-center justify-center rounded-xl"
+                                            style={{ width: 36, height: 36, background: p.green50, border: `0.5px solid #C0DD97` }}
+                                        >
+                                            <CheckCircle2 size={16} color={p.green600} strokeWidth={1.8} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[15px] font-semibold text-gray-900">Architecture guidelines</p>
+                                            <p className="text-[12px] text-gray-400">Critical best practices for performance & scalability</p>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {result.best_practices.map((bp, i) => (
+                                            <BestPracticeCard key={i} text={bp} index={i} />
+                                        ))}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            </motion.div>
+        </div>
+    )
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function PatternsPage() {
     const [patterns, setPatterns] = useState<Pattern[]>([])
     const [loading, setLoading] = useState(true)
     const [selectedPattern, setSelectedPattern] = useState<Pattern | null>(null)
-    const [techStack, setTechStack] = useState("")
-    const [tailoring, setTailoring] = useState(false)
-    const [tailoredResult, setTailoredResult] = useState<PatternTailoredResponse | null>(null)
 
     useEffect(() => {
         const fetchPatterns = async () => {
@@ -37,228 +320,78 @@ export default function PatternsPage() {
         fetchPatterns()
     }, [])
 
-    const handleTailor = async () => {
-        if (!selectedPattern || !techStack) return
-        setTailoring(true)
-        setTailoredResult(null)
-        try {
-            const result = await tailorPattern(selectedPattern.id, techStack)
-            setTailoredResult(result)
-        } catch (err) {
-            console.error("Tailoring failed:", err)
-            alert("Pattern tailoring failed. Please ensure the backend is running.")
-        } finally {
-            setTailoring(false)
-        }
-    }
-
     return (
-        <main className="min-h-screen bg-[#030014]">
+        <main style={{ minHeight: "100vh", background: "linear-gradient(160deg,#FAFAF7 0%,#F3F0FB 45%,#EEF5FF 100%)", fontFamily: "'DM Sans',sans-serif" }}>
             <Navbar />
 
-            <div className="pt-32 pb-20 px-6 max-w-6xl mx-auto">
+            <div className="pt-28 pb-24 px-6 max-w-6xl mx-auto">
+
+                {/* ── Hero ──────────────────────────────────────────────── */}
                 <div className="text-center mb-16">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-bold mb-6"
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-semibold uppercase tracking-widest mb-6 border"
+                        style={{ background: p.purple50, color: p.purple600, borderColor: p.purple100 }}
                     >
-                        <BookOpen className="w-4 h-4" />
-                        Engineering Knowledge Base
+                        <BookOpen size={13} strokeWidth={2} /> Engineering Knowledge Base
                     </motion.div>
-                    <h1 className="text-5xl font-bold mb-6">Architectural Patterns</h1>
-                    <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-                        Deep dive into common engineering pitfalls and get <span className="text-white font-bold">AI-tailored implementation</span> advice for your tech stack.
-                    </p>
+
+                    <motion.h1
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.05 }}
+                        className="text-[40px] md:text-[52px] font-semibold text-gray-900 tracking-tight leading-tight mb-5"
+                    >
+                        Architectural Patterns
+                    </motion.h1>
+
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.1 }}
+                        className="text-[16px] text-gray-500 max-w-xl mx-auto leading-relaxed"
+                    >
+                        Explore common engineering pitfalls and get{" "}
+                        <span className="font-semibold text-gray-800">AI-tailored implementation advice</span>{" "}
+                        for your tech stack.
+                    </motion.p>
                 </div>
 
+                {/* ── Grid / Loading ────────────────────────────────────── */}
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
-                        <p className="text-slate-400">Consulting the Knowledge Base...</p>
+                    <div className="flex flex-col items-center justify-center py-24">
+                        <Loader2
+                            size={36}
+                            className="animate-spin mb-4"
+                            color={p.purple600}
+                            strokeWidth={1.5}
+                        />
+                        <p className="text-[14px] text-gray-400">Consulting the knowledge base…</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {patterns.map((pattern, i) => {
-                            const Icon = iconMap[pattern.icon] || Network
-                            return (
-                                <motion.div
-                                    key={pattern.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: i * 0.1 }}
-                                    className="glass p-8 rounded-[32px] gradient-border flex flex-col h-full group"
-                                >
-                                    <div className="flex items-start justify-between mb-8">
-                                        <div className="p-4 rounded-2xl bg-primary/20 border border-primary/10 group-hover:bg-primary/30 transition-all">
-                                            <Icon className="w-6 h-6 text-primary" />
-                                        </div>
-                                        <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                                            {pattern.difficulty}
-                                        </span>
-                                    </div>
-
-                                    <h3 className="text-2xl font-bold mb-2">{pattern.title}</h3>
-                                    <p className="text-xs font-bold text-primary uppercase tracking-wider mb-6">{pattern.category}</p>
-
-                                    <div className="space-y-6 flex-grow">
-                                        <div>
-                                            <h4 className="text-sm font-bold text-rose-500 mb-2 flex items-center gap-2">
-                                                <Code2 className="w-4 h-4" /> The Problem
-                                            </h4>
-                                            <p className="text-sm text-slate-400 leading-relaxed italic border-l-2 border-rose-500/30 pl-4">
-                                                "{pattern.problem}"
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <h4 className="text-sm font-bold text-emerald-500 mb-2 flex items-center gap-2">
-                                                <Layers className="w-4 h-4" /> Recommended Solution
-                                            </h4>
-                                            <p className="text-sm text-slate-300 leading-relaxed">
-                                                {pattern.solution}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        onClick={() => {
-                                            setSelectedPattern(pattern)
-                                            setTailoredResult(null)
-                                            setTechStack("")
-                                        }}
-                                        className="mt-10 w-full py-4 rounded-2xl bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-all text-sm font-bold flex items-center justify-center gap-2 text-primary"
-                                    >
-                                        <Sparkles className="w-4 h-4" /> Tailor to my Tech Stack
-                                    </button>
-                                </motion.div>
-                            )
-                        })}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {patterns.map((pattern, i) => (
+                            <PatternCard
+                                key={pattern.id}
+                                pattern={pattern}
+                                index={i}
+                                onSelect={(p) => setSelectedPattern(p)}
+                            />
+                        ))}
                     </div>
                 )}
-
-                <AnimatePresence>
-                    {selectedPattern && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={() => setSelectedPattern(null)}
-                                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-                            />
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 20 }}
-                                className="relative w-full max-w-4xl bg-[#030014] p-8 md:p-14 rounded-[48px] border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] max-h-[95vh] overflow-y-auto"
-                            >
-                                <button
-                                    onClick={() => setSelectedPattern(null)}
-                                    className="absolute top-8 right-8 p-3 rounded-full hover:bg-white/5 transition-colors z-20"
-                                >
-                                    <X className="w-6 h-6 text-slate-500 hover:text-white" />
-                                </button>
-
-                                <div className="mb-12 relative border-b border-white/5 pb-12">
-                                    <div className="flex items-center gap-3 text-primary mb-6">
-                                        <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
-                                            <Sparkles className="w-4 h-4" />
-                                        </div>
-                                        <span className="font-bold tracking-[0.2em] uppercase text-[9px]">AI Implementation Assistant</span>
-                                    </div>
-                                    <h2 className="text-4xl font-extrabold mb-6 tracking-tight">Tailor: {selectedPattern.title}</h2>
-                                    <p className="text-slate-400 text-lg leading-relaxed max-w-2xl">Adapt this pattern to your specific technology stack with our <span className="text-white font-semibold">bespoke AI architectural analysis</span>.</p>
-                                </div>
-
-                                <div className="space-y-6 mb-20">
-                                    <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Current Tech Stack</label>
-                                        <div className="flex flex-col md:flex-row gap-4">
-                                            <input
-                                                type="text"
-                                                value={techStack}
-                                                onChange={(e) => setTechStack(e.target.value)}
-                                                placeholder="e.g. Next.js, FastAPI, PostgreSQL, Redis"
-                                                className="flex-grow bg-[#0a0a0a] border border-white/10 rounded-2xl px-6 py-5 focus:outline-none focus:border-primary/50 transition-all font-mono text-sm placeholder:text-slate-700"
-                                            />
-                                            <button
-                                                disabled={!techStack || tailoring}
-                                                onClick={handleTailor}
-                                                className="px-10 py-5 rounded-2xl bg-primary text-white font-bold hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(124,58,237,0.2)]"
-                                            >
-                                                {tailoring ? (
-                                                    <>
-                                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                                        <span>Processing...</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Sparkles className="w-4 h-4" />
-                                                        <span>Tailor Pattern</span>
-                                                    </>
-                                                )}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {tailoredResult && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 30 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="space-y-20 animate-fade-in pb-10"
-                                    >
-                                        <div className="space-y-8">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                                                    <Code2 className="text-primary w-5 h-5" />
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-2xl tracking-tight">Implementation Strategy</h4>
-                                                    <p className="text-xs text-slate-500 font-medium">Bespoke technical instructions generated for your stack</p>
-                                                </div>
-                                            </div>
-                                            <div className="pl-2">
-                                                <MarkdownRenderer content={tailoredResult.implementation} />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-8">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-                                                    <CheckCircle2 className="text-emerald-500 w-5 h-5" />
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-2xl tracking-tight">Architecture Guidelines</h4>
-                                                    <p className="text-xs text-slate-500 font-medium">Critical best practices for performance & scalability</p>
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                {tailoredResult.best_practices.map((bp, i) => (
-                                                    <motion.div
-                                                        key={i}
-                                                        initial={{ opacity: 0, scale: 0.98 }}
-                                                        animate={{ opacity: 1, scale: 1 }}
-                                                        transition={{ delay: i * 0.1 }}
-                                                        className="p-8 rounded-[32px] bg-[#0a0a0a] border border-white/5 hover:border-emerald-500/20 transition-all group"
-                                                    >
-                                                        <div className="flex gap-5">
-                                                            <div className="mt-1 w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 transition-colors">
-                                                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                                                            </div>
-                                                            <MarkdownRenderer content={bp} className="text-sm" />
-                                                        </div>
-                                                    </motion.div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </motion.div>
-                        </div>
-                    )}
-                </AnimatePresence>
             </div>
+
+            {/* ── Modal ─────────────────────────────────────────────────── */}
+            <AnimatePresence>
+                {selectedPattern && (
+                    <TailorModal
+                        pattern={selectedPattern}
+                        onClose={() => setSelectedPattern(null)}
+                    />
+                )}
+            </AnimatePresence>
         </main>
     )
 }

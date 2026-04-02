@@ -54,7 +54,7 @@ export interface PatternTailoredResponse {
 }
 
 export async function listDecisions(): Promise<Decision[]> {
-    const response = await fetch(`${API_BASE_URL}/decisions`);
+    const response = await fetch(`${API_BASE_URL}/decisions`, { cache: 'no-store' });
     if (!response.ok) {
         throw new Error("Failed to fetch decisions");
     }
@@ -63,7 +63,7 @@ export async function listDecisions(): Promise<Decision[]> {
 }
 
 export async function getDecision(id: string): Promise<Decision> {
-    const response = await fetch(`${API_BASE_URL}/decisions/${id}`);
+    const response = await fetch(`${API_BASE_URL}/decisions/${id}`, { cache: 'no-store' });
     if (!response.ok) {
         throw new Error("Failed to fetch decision");
     }
