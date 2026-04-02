@@ -1,290 +1,122 @@
-# 🚀 AI-Based Engineering Decision Review System
+# 🛡️ ArchGuard — AI Engineering Decision Review System
 
-## 📌 Overview
-
-This project is an AI-powered system that reviews engineering and architectural decisions before implementation. Unlike traditional tools that analyze code after it is written, this system helps engineers avoid future scalability and maintainability issues by validating decisions early in the development lifecycle.
-
----
-
-## ❓ Problem Statement
-
-Many software failures occur due to poor design and architectural decisions, not coding errors. These decisions often cause:
-
-- Long-term technical debt
-- Performance bottlenecks
-- Costly refactoring efforts
-- Scalability limitations
-
-**Currently, there is no automated system that reviews engineering decisions before code is written.**
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js" alt="Next.js">
+  <img src="https://img.shields.io/badge/Go-1.24-00ADD8?style=for-the-badge&logo=go&logoColor=white" alt="Go">
+  <img src="https://img.shields.io/badge/MongoDB-Latest-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB">
+  <img src="https://img.shields.io/badge/OpenAI-GPT--4o-412991?style=for-the-badge&logo=openai&logoColor=white" alt="OpenAI">
+  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License">
+</p>
 
 ---
 
-## 💡 Solution
+## ✨ Premium Intelligence for Software Architects
 
-This system allows engineers to submit design decisions (architecture, APIs, databases, etc.) for AI-powered analysis. The AI engine evaluates these decisions and provides:
-
-- **Risk Analysis** – Identifies potential scalability and maintainability issues
-- **Better Alternatives** – Suggests industry-standard approaches
-- **Long-term Impact Insights** – Evaluates future implications of the decision
+**ArchGuard** is a sophisticated, AI-driven platform designed to validate engineering and architectural decisions *before* a single line of code is written. By leveraging Large Language Models (LLMs), it identifies scalability bottlenecks, maintainability risks, and architectural anti-patterns in real-time.
 
 ---
 
-## 🧱 Tech Stack
+## 💎 Core Features
 
-| Technology | Purpose |
-|-----------|---------|
-| **Next.js** | Frontend dashboard & decision submission forms |
-| **Go (Golang)** | Backend API & orchestration layer |
-| **AWS Lambda** | Asynchronous AI processing |
-| **DynamoDB** | Decision & feedback storage |
-| **OpenAI API** | AI reasoning engine |
-| **Docker** | Development environment consistency |
+### 🧠 **AI-Powered Decision Analysis**
+Submit your architectural proposals—from database schemas to microservice boundaries—and receive instant, high-fidelity feedback on:
+- **Risk Assessment**: High, Medium, and Low risk categorizations.
+- **Scalability Scores**: Evaluation of how your design handles growth.
+- **Maintainability Insights**: Detection of potential technical debt.
+
+### 🏛️ **Advanced Architectural Patterns**
+A curated library of industry-standard patterns (Event-Sourcing, CQRS, Hexagonal Architecture) integrated with AI to provide **Tailored Implementations** specific to your chosen technology stack.
+
+### 📊 **Visual Insights & Reporting**
+Beautiful, designer-focused dashboards that track decision history, health metrics, and organizational "decision memory."
+
+### ⚡ **High-Performance Backend**
+Built with **Go 1.24**, ensuring ultra-low latency processing and robust concurrency for mission-critical architectural reviews.
 
 ---
 
-## 🧠 System Architecture
+## 🛠️ The Technology Stack
 
+| Layer | Technology | Rationale |
+| :--- | :--- | :--- |
+| **Frontend** | `Next.js 15` | Premium UI with App Router and Server Components. |
+| **Styling** | `Vanilla CSS` | Total control over high-end animations and glassmorphism. |
+| **Backend** | `Go (Golang)` | Type-safe, concurrent, and production-ready performance. |
+| **Database** | `MongoDB` | Flexible document storage for evolving architectural data. |
+| **AI Engine** | `OpenAI GPT-4o` | State-of-the-art reasoning for complex system design. |
+
+---
+
+## 🚀 Quick Setup
+
+### 1. MongoDB Setup
+ArchGuard requires a MongoDB instance. You can use a local instance or a free cluster from [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas-database).
+
+### 2. Backend (Go)
+```bash
+cd Backend
+cp .env.example .env
+# Edit .env with your MONGO_URI and OPENAI_API_KEY
+go run main.go
 ```
-User (Frontend)
-   ↓
-Next.js (Decision Form UI)
-   ↓
-Go Backend API (Validation + Orchestration)
-   ↓
-AWS Lambda (Async AI Processing)
-   ↓
-OpenAI (Decision Reasoning)
-   ↓
-DynamoDB (Store decision + feedback)
-   ↓
-Next.js Dashboard (Show results)
+
+### 3. Frontend (Next.js)
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
 ---
 
-## 🔄 How It Works
+## 🏗️ System Architecture
 
-1. **Engineer submits a decision** via the web interface
-2. **Go backend validates** and stores the decision
-3. **AWS Lambda processes** the decision asynchronously
-4. **OpenAI analyzes** the decision and generates feedback
-5. **AI feedback is saved** to DynamoDB
-6. **Engineer views results** on the dashboard
-
----
-
-## 🎯 Project Goals
-
-- Prevent bad engineering decisions before implementation
-- Reduce technical debt across projects
-- Help junior engineers learn decision-making best practices
-- Create organizational decision memory and knowledge base
-- Improve overall system quality and maintainability
+```mermaid
+graph TD
+    User([User]) --> Frontend[Next.js Dashboard]
+    Frontend --> Backend[Go API Server]
+    Backend --> AI[OpenAI GPT-4o]
+    Backend --> DB[(MongoDB Atlas)]
+    AI -.-> Analysis[Architectural Review]
+    Analysis --> Backend
+    Backend --> Frontend
+```
 
 ---
 
-## ✅ Development Roadmap
+## 🗺️ Roadmap to Excellence
 
-### **Phase 1 – MVP (Minimum Viable Product)**
-
-- [ ] Next.js decision submission form
-- [ ] Go REST API with basic validation
-- [ ] Direct OpenAI integration (without Lambda)
-- [ ] Display AI feedback on frontend
-- [ ] Basic decision history
-
-### **Phase 2 – Production Ready**
-
-- [ ] AWS Lambda for async processing
-- [ ] DynamoDB integration for persistent storage
-- [ ] Decision status tracking
-- [ ] Comprehensive error handling
-- [ ] Docker containerization
-
-### **Phase 3 – Advanced Features**
-
-- [ ] Decision comparison tool
-- [ ] Risk severity scoring
-- [ ] Team-based decision rules
-- [ ] Learning suggestions for junior engineers
-- [ ] Cost impact estimation
-
----
-
-## 📋 Detailed Implementation Tasks
-
-### **A. Frontend – Next.js**
-
-**Responsibilities:**
-- Collect decision information from engineers
-- Display AI-generated feedback
-- Provide decision history dashboard
-
-**Tasks:**
-- [ ] Create decision submission form with fields:
-  - Project type
-  - Expected scale
-  - Architecture choice
-  - Database choice
-  - Decision explanation
-- [ ] Create dashboard page with:
-  - List of submitted decisions
-  - Status indicators (Pending/Reviewed)
-  - AI feedback viewer
-- [ ] Integrate with Go backend API
-- [ ] Implement client-side validation
-
-**Why Next.js?**
-- Fast, production-ready UI framework
-- Industry standard for modern web applications
-- Excellent developer experience
-
----
-
-### **B. Backend API – Go**
-
-**Responsibilities:**
-- Validate incoming decision data
-- Orchestrate AI processing workflow
-- Manage data persistence
-
-**Tasks:**
-- [ ] Create REST API endpoints:
-  - `POST /decisions` – Submit new decision
-  - `GET /decisions` – List all decisions
-  - `GET /decisions/{id}` – Get decision details
-- [ ] Implement input validation
-- [ ] Generate structured AI prompts
-- [ ] Trigger AWS Lambda asynchronously
-- [ ] Store decisions in DynamoDB
-
-**Why Go?**
-- High performance and concurrency support
-- Production-grade reliability
-- Widely used in backend systems
-
----
-
-### **C. AWS Lambda – Async Processing**
-
-**Responsibilities:**
-- Handle heavy AI processing without blocking
-- Scale automatically based on demand
-
-**Tasks:**
-- [ ] Create Lambda function to receive decision ID
-- [ ] Fetch decision data from DynamoDB
-- [ ] Call OpenAI API with structured prompt
-- [ ] Parse and validate AI response
-- [ ] Update DynamoDB with feedback
-
-**Why Lambda?**
-- Serverless architecture (no infrastructure management)
-- Cost-efficient pay-per-use model
-- Auto-scaling capabilities
-
----
-
-### **D. AI Layer – OpenAI**
-
-**Responsibilities:**
-- Analyze engineering decisions
-- Provide actionable insights
-
-**Tasks:**
-- [ ] Design structured prompt template
-- [ ] Configure AI to analyze:
-  - Scalability risks
-  - Maintainability issues
-  - Performance concerns
-  - Alternative approaches
-- [ ] Return structured output containing:
-  - Risk assessment
-  - Actionable suggestions
-  - Long-term impact analysis
-
-**Note:** AI is used for reasoning and analysis, not conversational chat.
-
----
-
-### **E. Database – DynamoDB**
-
-**Responsibilities:**
-- Store decision history
-- Persist AI-generated feedback
-
-**Tasks:**
-- [ ] Create `Decisions` table with schema:
-  - `decision_id` (Primary Key)
-  - Input data (decision details)
-  - Status (Pending/Reviewed)
-  - AI feedback
-  - Timestamps (created_at, updated_at)
-
-**Why DynamoDB?**
-- Serverless NoSQL database
-- Fast and predictable performance
-- Seamless AWS integration
-
----
-
-### **F. Docker – Development Environment**
-
-**Responsibilities:**
-- Ensure consistent development environment
-- Simplify deployment process
-
-**Tasks:**
-- [ ] Create Dockerfile for Go backend
-- [ ] Create Dockerfile for Lambda (optional)
-- [ ] Set up Docker Compose for local development
-- [ ] Document container usage
-
----
-
-## 🧪 Future Enhancements
-
-- **Decision Comparison Tool** – Compare multiple architectural approaches
-- **Risk Severity Scoring** – Quantify risk levels (Low/Medium/High/Critical)
-- **Team-based Rules** – Custom validation rules per organization
-- **Cost Impact Estimation** – Project infrastructure costs
-- **Integration with CI/CD** – Automated decision reviews in pipelines
-- **Knowledge Base** – Build organizational decision patterns
-
----
-
-## 🏁 Project Status
-
-🚧 **Project under active development**  
-✅ MVP phase in progress
-
----
-
-## 📚 How to Explain This Project
-
-### **Elevator Pitch:**
-> "This system uses AI to review engineering decisions before implementation, helping teams avoid long-term scalability and maintainability problems."
-
-### **Technical Explanation:**
-> "The system provides a proactive approach to software quality by analyzing architectural decisions using AI. Engineers submit their design choices through a Next.js frontend, which are processed by a Go backend. AWS Lambda handles asynchronous AI analysis via OpenAI, and results are stored in DynamoDB. This creates a feedback loop that helps teams make better decisions and builds organizational knowledge."
-
-### **Business Value:**
-> "By catching architectural issues before code is written, we reduce technical debt, minimize costly refactoring, and improve overall system quality. This is especially valuable for teams with junior engineers who can learn from AI-generated insights."
-
----
-
-## 🤝 Contributing
-
-This project is designed to demonstrate production-grade system design using modern technologies. Contributions and suggestions are welcome.
+- [x] **Phase 1: MVP** — Core AI analysis engine and decision history.
+- [x] **Phase 2: UI Modernization** — Premium light-theme with grain overlays.
+- [x] **Phase 3: Pattern Tailoring** — Technology-specific implementation guides.
+- [ ] **Phase 4: Multi-Model Support** — Toggle between GPT-4o, Claude 3.5, and Gemini Pro.
+- [ ] **Phase 5: Git Integration** — Automated reviews triggered by PR comments.
 
 ---
 
 ## 📄 License
 
-[To be determined]
+This project is licensed under the **MIT License**.
+
+```text
+MIT License
+
+Copyright (c) 2026 ArchGuard Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT...
+```
 
 ---
 
-## 📞 Contact
-
-[Project maintainer information to be added]
+<p align="center">
+  Built with ❤️ for the Engineering Community.
+</p>
