@@ -15,7 +15,7 @@ func Load() *Config {
 	return &Config{
 		MongoURI:     getEnv("MONGO_URI", "mongodb://localhost:27017"),
 		MongoDB:      getEnv("MONGO_DB", "ai_decision_review"),
-		OpenAIAPIKey: getEnv("OPENAI_API_KEY", ""),
+		OpenAIAPIKey: getEnv("OPENAI_API_KEY", ""), // Fix: Read from environment variable
 	}
 }
 

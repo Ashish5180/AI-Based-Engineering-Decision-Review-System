@@ -85,10 +85,12 @@ func (s *MongoStore) PutDecision(ctx context.Context, d *models.Decision) error 
 	return nil
 }
 
-// GetDecision retrieves a single decision by ID, using cache if available.
+// GetDecision retrieves a single decision by ID, using cache if available and fresh.
 func (s *MongoStore) GetDecision(ctx context.Context, id string) (*models.Decision, error) {
+	const cacheTTL = 30 * time.Second
+
 	s.mu.RLock()
-	if d, ok := s.itemCache[id]; ok {
+	if d, ok := s.itemCache[id]; ok && time.Since(s.lastUpdate) < cacheTTL {
 		s.mu.RUnlock()
 		return d, nil
 	}
@@ -108,15 +110,18 @@ func (s *MongoStore) GetDecision(ctx context.Context, id string) (*models.Decisi
 	// Update cache
 	s.mu.Lock()
 	s.itemCache[id] = &d
+	s.lastUpdate = time.Now()
 	s.mu.Unlock()
 
 	return &d, nil
 }
 
-// ListDecisions returns all decisions from the collection, using cache if available.
+// ListDecisions returns all decisions from the collection, using cache if available and not stale.
 func (s *MongoStore) ListDecisions(ctx context.Context) ([]models.Decision, error) {
+	const cacheTTL = 30 * time.Second
+
 	s.mu.RLock()
-	if s.listCache != nil {
+	if s.listCache != nil && time.Since(s.lastUpdate) < cacheTTL {
 		defer s.mu.RUnlock()
 		return s.listCache, nil
 	}
@@ -137,9 +142,10 @@ func (s *MongoStore) ListDecisions(ctx context.Context) ([]models.Decision, erro
 		decisions = []models.Decision{}
 	}
 
-	// Update cache
+	// Update cache and timestamp
 	s.mu.Lock()
 	s.listCache = decisions
+	s.lastUpdate = time.Now()
 	s.mu.Unlock()
 
 	return decisions, nil
