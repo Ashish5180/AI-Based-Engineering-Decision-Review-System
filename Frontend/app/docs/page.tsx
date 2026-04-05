@@ -14,25 +14,28 @@ import {
     Terminal,
     MessageSquare,
     ArrowRight,
-    Server,
-    Database,
     Globe,
     Activity,
     AlertCircle,
     CheckCircle2
 } from "lucide-react"
-import Link from "next/link"
 import Navbar from "@/components/Navbar"
 
-const p = {
-    purple50: "#EEEDFE",
-    purple100: "#CECBF6",
-    purple600: "#7C3AED",
-    purple900: "#4C1D95",
-    slate50: "#F8FAFC",
-    slate100: "#F1F5F9",
-    slate600: "#475569",
-    slate900: "#0F172A",
+interface DocSection {
+    title: string;
+    icon: React.ElementType;
+    content: string;
+    color: string;
+    iconColor: string;
+    borderColor: string;
+}
+
+interface DocContent {
+    title: string;
+    tag: string;
+    description: string;
+    sections: DocSection[];
+    checklist: string[];
 }
 
 const CATEGORIES = [
@@ -74,7 +77,7 @@ const CATEGORIES = [
     }
 ]
 
-const DOCS_CONTENT: Record<string, any> = {
+const DOCS_CONTENT: Record<string, DocContent> = {
     "intro": {
         title: "Introduction to ArchGuard",
         tag: "Introduction",
@@ -455,7 +458,7 @@ export default function DocsPage() {
                             </div>
 
                             <div className="space-y-10 text-slate-600 leading-relaxed">
-                                {content.sections.map((section: any, i: number) => (
+                                {content.sections.map((section, i: number) => (
                                     <section key={i}>
                                         <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-3">
                                             <div className={`w-9 h-9 rounded-xl ${section.color} flex items-center justify-center border ${section.borderColor}`}>

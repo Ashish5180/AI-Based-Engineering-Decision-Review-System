@@ -9,9 +9,9 @@ function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
     const count = useMotionValue(0)
     const rounded = useTransform(count, (v) => Math.round(v).toLocaleString() + suffix)
     useEffect(() => {
-        const ctrl = animate(count, to, { duration: 2.2, delay: 0.9, ease: [0.16, 1, 0.3, 1] as any })
+        const ctrl = animate(count, to, { duration: 2.2, delay: 0.9, ease: [0.16, 1, 0.3, 1] })
         return ctrl.stop
-    }, [])
+    }, [count, to])
     return <motion.span>{rounded}</motion.span>
 }
 
@@ -498,7 +498,7 @@ export default function Hero() {
                                                 <motion.div
                                                     initial={{ width: 0 }}
                                                     animate={{ width: "82%" }}
-                                                    transition={{ duration: 1.4, delay: 1.5, ease: [0.16, 1, 0.3, 1] as any }}
+                                                    transition={{ duration: 1.4, delay: 1.5, ease: [0.16, 1, 0.3, 1] }}
                                                     style={{ height: "100%", borderRadius: 6, background: "linear-gradient(90deg, #7C3AED, #C084FC)" }}
                                                 />
                                             </div>

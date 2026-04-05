@@ -10,7 +10,6 @@ import {
     BarChart3, ShieldCheck,
 } from "lucide-react"
 import Navbar from "@/components/Navbar"
-import { cn } from "@/lib/utils"
 import { listDecisions, Decision } from "@/lib/api"
 
 export default function DashboardPage() {

@@ -96,7 +96,7 @@ function PatternCard({
                         className="text-[13px] text-gray-500 leading-relaxed italic border-l-2 pl-3"
                         style={{ borderColor: "#F7C1C1" }}
                     >
-                        "{pattern.problem}"
+                        &quot;{pattern.problem}&quot;
                     </p>
                 </div>
 

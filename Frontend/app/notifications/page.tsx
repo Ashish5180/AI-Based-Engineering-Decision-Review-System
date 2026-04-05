@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   CheckCircle2,
@@ -11,10 +11,7 @@ import {
   RefreshCw,
   ArrowUpRight,
   BellOff,
-  Settings,
-  X,
-  Sparkles,
-  MoreVertical
+  Settings
 } from "lucide-react"
 import Link from "next/link"
 import Navbar from "@/components/Navbar"
@@ -255,7 +252,7 @@ export default function NotificationsPage() {
             {["all", "unread"].map((f) => (
               <button
                 key={f}
-                onClick={() => setFilter(f as any)}
+                onClick={() => setFilter(f as "all" | "unread")}
                 className={`px-6 py-2 rounded-lg text-xs font-bold capitalize transition-all flex-1 md:flex-none ${
                   filter === f
                     ? "bg-white text-slate-900 shadow-sm"

@@ -17,7 +17,7 @@ export default function MarkdownRenderer({ content, className }: MarkdownRendere
             <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                    code({ node, inline, className, children, ...props }: any) {
+                    code({ inline, className, children, ...props }: { inline?: boolean, className?: string, children?: React.ReactNode }) {
                         const match = /language-(\w+)/.exec(className || '')
                         const language = match ? match[1] : 'text'
 

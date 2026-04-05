@@ -411,9 +411,8 @@ export default function NewReviewPage() {
                     <form 
                         onSubmit={handleSubmit}
                         onKeyDown={(e) => {
-                            if (e.key === 'Enter' && step < 4) {
+                            if (e.key === 'Enter') {
                                 e.preventDefault()
-                                setStep(s => s + 1)
                             }
                         }}
                     >

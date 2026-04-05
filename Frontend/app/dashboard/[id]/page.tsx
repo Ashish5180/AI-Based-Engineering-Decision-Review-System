@@ -7,8 +7,6 @@ import {
     CheckCircle2,
     AlertCircle,
     Shield,
-    Cpu,
-    ExternalLink,
     Calendar,
     Layout,
     Loader2,
@@ -17,7 +15,6 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import Navbar from "@/components/Navbar"
-import { cn } from "@/lib/utils"
 import { getDecision, Decision } from "@/lib/api"
 
 // ─── Colour tokens ────────────────────────────────────────────────────────────
