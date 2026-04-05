@@ -181,8 +181,9 @@ export default function NewReviewPage() {
         { title: "Finalizing Report", sub: "Polishing architectural insights...", icon: Sparkles },
     ]
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const handleSubmit = async () => {
+        if (step !== 4) return
+        if (isSubmitting || isAnalyzing) return
         if (!formData.title) { alert("Please provide a project title."); setStep(1); return }
         
         setIsSubmitting(true)
@@ -409,7 +410,7 @@ export default function NewReviewPage() {
 
                     {/* Form body */}
                     <form 
-                        onSubmit={handleSubmit}
+                        onSubmit={(e) => e.preventDefault()}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                                 e.preventDefault()
@@ -682,7 +683,8 @@ export default function NewReviewPage() {
                                 </button>
                             ) : (
                                 <button
-                                    type="submit"
+                                    type="button"
+                                    onClick={() => handleSubmit()}
                                     disabled={isSubmitting || !formData.title}
                                     className="px-7 py-2.5 rounded-xl text-[13px] font-semibold text-white flex items-center gap-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-[0.98]"
                                     style={{ background: p.purple600 }}
