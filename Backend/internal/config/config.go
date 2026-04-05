@@ -2,7 +2,7 @@ package config
 
 import "os"
 
-// Config holds all application configuration loaded from environment variables.
+// Config holds all application configuration loaded from environment variables
 type Config struct {
 	MongoURI     string
 	MongoDB      string
