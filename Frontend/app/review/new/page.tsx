@@ -523,9 +523,7 @@ export default function NewReviewPage() {
                                             ))}
                                         </div>
                                     </motion.div>
-                                ) : (
-                                    <>
-                                        {step === 1 && (
+                                ) : step === 1 ? (
                                     <motion.div
                                         key="step1"
                                         initial={{ opacity: 0, x: 16 }}
@@ -558,9 +556,7 @@ export default function NewReviewPage() {
                                             />
                                         </div>
                                     </motion.div>
-                                )}
-
-                                {step === 2 && (
+                                ) : step === 2 ? (
                                     <motion.div
                                         key="step2"
                                         initial={{ opacity: 0, x: 16 }}
@@ -578,9 +574,7 @@ export default function NewReviewPage() {
                                             className={cn(inputCls, "resize-none")}
                                         />
                                     </motion.div>
-                                )}
-
-                                {step === 3 && (
+                                ) : step === 3 ? (
                                     <motion.div
                                         key="step3"
                                         initial={{ opacity: 0, x: 16 }}
@@ -598,9 +592,7 @@ export default function NewReviewPage() {
                                             className={cn(inputCls, "resize-none")}
                                         />
                                     </motion.div>
-                                )}
-
-                                {step === 4 && (
+                                ) : step === 4 ? (
                                     <motion.div
                                         key="step4"
                                         initial={{ opacity: 0, x: 16 }}
@@ -661,9 +653,7 @@ export default function NewReviewPage() {
                                             />
                                         </div>
                                     </motion.div>
-                                )}
-                                </>
-                                )}
+                                ) : null}
                             </AnimatePresence>
                         </div>
 
