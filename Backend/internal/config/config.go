@@ -10,12 +10,11 @@ type Config struct {
 }
 
 // Load reads environment variables and returns a Config.
-// Defaults are provided for local development.
 func Load() *Config {
 	return &Config{
-		MongoURI:     getEnv("MONGO_URI", "mongodb://localhost:27017"),
+		MongoURI:     os.Getenv("MONGO_URI"),
 		MongoDB:      getEnv("MONGO_DB", "ai_decision_review"),
-		OpenAIAPIKey: getEnv("OPENAI_API_KEY", ""), // Fix: Read from environment variable
+		OpenAIAPIKey: os.Getenv("OPENAI_API_KEY"),
 	}
 }
 

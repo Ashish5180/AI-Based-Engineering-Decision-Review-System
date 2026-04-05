@@ -7,9 +7,14 @@ import (
 	"github.com/ashish5180/ai-decision-review/internal/config"
 	"github.com/ashish5180/ai-decision-review/internal/logger"
 	"github.com/ashish5180/ai-decision-review/internal/server"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Load .env file for local development
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, assuming environment variables are set manually")
+	}
 	// Initialize structured logging
 	logger.Init("ai-decision-review", logger.INFO)
 	l := logger.Default()
