@@ -411,7 +411,7 @@ export default function DashboardPage() {
                 <div className="main-grid">
 
                     {/* ── Reviews list ── */}
-                    <div className="list-container" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <div className="list-container" style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 0 }}>
                         <p className="section-label" style={{ marginBottom: 4 }}>Recent Decisions</p>
                         {isLoading ? (
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "100px 24px", background: "white", borderRadius: 24, border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
@@ -470,11 +470,19 @@ export default function DashboardPage() {
                                                 }}>
                                                     <status.icon style={{ width: 20, height: 20, color: status.color }} />
                                                 </div>
-                                                <div style={{ minWidth: 0 }}>
-                                                    <p style={{ fontSize: 16, fontWeight: 600, color: "#1C1917", marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                                <div style={{ minWidth: 0, flex: 1 }}>
+                                                    <p style={{
+                                                        fontSize: 16, fontWeight: 600, color: "#1C1917", marginBottom: 4,
+                                                        display: "-webkit-box",
+                                                        WebkitLineClamp: 1,
+                                                        WebkitBoxOrient: "vertical",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis",
+                                                        wordBreak: "break-all"
+                                                    }}>
                                                         {decision.title}
                                                     </p>
-                                                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                                                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", minWidth: 0 }}>
                                                         <span style={{ fontSize: 13, color: "#9CA3AF" }}>{formatDate(decision.created_at)}</span>
                                                         <span style={{ width: 4, height: 4, borderRadius: "50%", background: "#D1D5DB" }} />
                                                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
