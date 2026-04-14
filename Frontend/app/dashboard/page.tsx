@@ -7,7 +7,7 @@ import {
     Search, Filter, History, ChevronRight,
     AlertCircle, CheckCircle, Clock,
     ExternalLink, Loader2, Plus, TrendingUp,
-    BarChart3, ShieldCheck,
+    BarChart3, ShieldCheck, Sparkles,
 } from "lucide-react"
 import Navbar from "@/components/Navbar"
 import { listDecisions, Decision } from "@/lib/api"
@@ -278,6 +278,51 @@ export default function DashboardPage() {
                     background: #FFF5F5; border: 1px solid rgba(220,38,38,0.15);
                     border-radius: 24px;
                 }
+                .main-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 300px;
+                    gap: 32px;
+                    align-items: start;
+                }
+
+                @media (max-width: 1024px) {
+                    .main-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .sidebar-container {
+                        order: 2;
+                    }
+                    .list-container {
+                        order: 1;
+                    }
+                }
+
+                /* Responsive stat cards */
+                .stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 16px;
+                }
+
+                @media (max-width: 768px) {
+                    .stats-grid {
+                        grid-template-columns: 1fr;
+                    }
+                }
+
+                /* Mobile tweaks */
+                @media (max-width: 640px) {
+                    .dashboard-container {
+                        padding: 100px 20px 60px !important;
+                    }
+                    .page-header {
+                        margin-bottom: 24px !important;
+                    }
+                    .new-review-btn {
+                        width: 100%;
+                        justify-content: center;
+                    }
+                }
             `}</style>
 
             {/* Ambient backgrounds */}
@@ -287,114 +332,119 @@ export default function DashboardPage() {
 
             <Navbar />
 
-            <div style={{ position: "relative", zIndex: 10, paddingTop: 110, paddingBottom: 80, maxWidth: 1200, margin: "0 auto", padding: "110px 32px 80px" }}>
+            <div className="dashboard-container" style={{ position: "relative", zIndex: 10, paddingTop: 110, paddingBottom: 80, maxWidth: 1200, margin: "0 auto", padding: "110px 32px 80px" }}>
 
                 {/* ── Page header ── */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
-                    style={{ display: "flex", flexDirection: "column", gap: 20, marginBottom: 40 }}
+                    className="page-header"
+                    style={{ display: "flex", flexDirection: "column", gap: 24, marginBottom: 48 }}
                 >
                     {/* Top row: title + new review */}
-                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
-                        <div>
-                            <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9CA3AF", marginBottom: 6 }}>
-                                Dashboard
+                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 20 }}>
+                        <div style={{ flex: "1 1 300px" }}>
+                            <p style={{ fontSize: 13, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#7C3AED", marginBottom: 8 }}>
+                                Overview
                             </p>
-                            <h1 className="dash-serif" style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 700, color: "#1C1917", letterSpacing: "-0.02em", lineHeight: 1.1, marginBottom: 6 }}>
-                                Decision History
+                            <h1 className="dash-serif" style={{ fontSize: "clamp(32px, 5vw, 48px)", fontWeight: 700, color: "#1C1917", letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 12 }}>
+                                Engineering Decisions
                             </h1>
-                            <p style={{ color: "#6B7280", fontSize: 15, lineHeight: 1.5 }}>
-                                Manage and reference your past engineering architectural reviews.
+                            <p style={{ color: "#6B7280", fontSize: 16, lineHeight: 1.6, maxWidth: 600 }}>
+                                Reference and manage your architectural reviews. Track risks and maintain consistency across your projects.
                             </p>
                         </div>
                         <Link href="/review/new" className="new-review-btn">
-                            <Plus style={{ width: 15, height: 15 }} />
-                            New Review
+                            <Plus style={{ width: 18, height: 18 }} />
+                            Start New Review
                         </Link>
                     </div>
 
                     {/* Stat cards row */}
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
+                    <div className="stats-grid">
                         {[
-                            { icon: BarChart3, label: "Total Reviews", value: totalReviews, color: "#7C3AED", bg: "#EDE9FE" },
-                            { icon: AlertCircle, label: "Critical Risks", value: criticalRisks, color: "#DC2626", bg: "#FEE2E2" },
-                            { icon: ShieldCheck, label: "Approved", value: approved, color: "#059669", bg: "#D1FAE5" },
-                        ].map(({ icon: Icon, label, value, color, bg }) => (
+                            { icon: BarChart3, label: "Total Reviews", value: totalReviews, color: "#7C3AED", bg: "#EDE9FE", desc: "Total analyzed" },
+                            { icon: AlertCircle, label: "Critical Risks", value: criticalRisks, color: "#DC2626", bg: "#FEE2E2", desc: "Require attention" },
+                            { icon: ShieldCheck, label: "Health Score", value: isLoading ? "—" : (totalReviews > 0 ? `${Math.round((approved / totalReviews) * 100)}%` : "N/A"), color: "#059669", bg: "#D1FAE5", desc: "Approval rate" },
+                        ].map(({ icon: Icon, label, value, color, bg, desc }) => (
                             <div key={label} className="stat-card">
-                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                                    <span style={{ fontSize: 12, fontWeight: 500, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.07em" }}>{label}</span>
-                                    <div style={{ width: 30, height: 30, borderRadius: 8, background: bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                        <Icon style={{ width: 14, height: 14, color }} />
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                                    <div style={{ width: 36, height: 36, borderRadius: 10, background: bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <Icon style={{ width: 18, height: 18, color }} />
                                     </div>
+                                    <span style={{ fontSize: 12, fontWeight: 600, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</span>
                                 </div>
-                                <span className="dash-serif" style={{ fontSize: 34, fontWeight: 700, color: "#1C1917", letterSpacing: "-0.03em", lineHeight: 1 }}>
-                                    {isLoading ? "—" : value}
-                                </span>
-                                <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 4 }}>
-                                    <TrendingUp style={{ width: 11, height: 11, color: color }} />
-                                    <span style={{ fontSize: 11, color: color, fontWeight: 500 }}>Updated now</span>
+                                <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                                    <span className="dash-serif" style={{ fontSize: 36, fontWeight: 700, color: "#1C1917", letterSpacing: "-0.03em", lineHeight: 1 }}>
+                                        {isLoading ? "—" : value}
+                                    </span>
+                                </div>
+                                <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 6 }}>
+                                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: color }} />
+                                    <span style={{ fontSize: 12, color: "#6B7280", fontWeight: 500 }}>{desc}</span>
                                 </div>
                             </div>
                         ))}
                     </div>
 
                     {/* Search + filter */}
-                    <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                        <div style={{ position: "relative", flex: 1, maxWidth: 360 }}>
-                            <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", width: 15, height: 15, color: "#9CA3AF" }} />
+                    <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                        <div style={{ position: "relative", flex: "1 1 300px" }}>
+                            <Search style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", width: 16, height: 16, color: "#9CA3AF" }} />
                             <input
                                 type="text"
-                                placeholder="Search reviews…"
+                                placeholder="Search by decision title or keyword..."
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
                                 className="dash-search"
+                                style={{ paddingLeft: 42, height: 46 }}
                             />
                         </div>
-                        <button className="filter-btn">
-                            <Filter style={{ width: 16, height: 16 }} />
+                        <button className="filter-btn" style={{ height: 46, width: 46 }}>
+                            <Filter style={{ width: 18, height: 18 }} />
                         </button>
                     </div>
                 </motion.div>
 
                 {/* ── Main grid ── */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 24, alignItems: "start" }}>
+                <div className="main-grid">
 
                     {/* ── Reviews list ── */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div className="list-container" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        <p className="section-label" style={{ marginBottom: 4 }}>Recent Decisions</p>
                         {isLoading ? (
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "80px 24px", background: "white", borderRadius: 24, border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-                                <div style={{ width: 48, height: 48, borderRadius: 14, background: "#EDE9FE", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                                    <Loader2 style={{ width: 22, height: 22, color: "#7C3AED" }} className="animate-spin" />
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "100px 24px", background: "white", borderRadius: 24, border: "1px solid rgba(0,0,0,0.07)", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+                                <div style={{ width: 56, height: 56, borderRadius: 16, background: "#EDE9FE", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+                                    <Loader2 style={{ width: 26, height: 26, color: "#7C3AED" }} className="animate-spin" />
                                 </div>
-                                <p style={{ color: "#6B7280", fontSize: 14, fontWeight: 500 }}>Loading your decision history…</p>
+                                <p style={{ color: "#6B7280", fontSize: 15, fontWeight: 500 }}>Synchronizing history...</p>
                             </div>
                         ) : error ? (
                             <div className="error-state">
-                                <div style={{ width: 48, height: 48, borderRadius: 14, background: "#FEE2E2", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                                    <AlertCircle style={{ width: 22, height: 22, color: "#DC2626" }} />
+                                <div style={{ width: 56, height: 56, borderRadius: 16, background: "#FEE2E2", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+                                    <AlertCircle style={{ width: 26, height: 26, color: "#DC2626" }} />
                                 </div>
-                                <p style={{ color: "#DC2626", fontWeight: 600, marginBottom: 6, fontSize: 15 }}>{error}</p>
+                                <p style={{ color: "#DC2626", fontWeight: 600, marginBottom: 8, fontSize: 16 }}>{error}</p>
                                 <button
                                     onClick={() => window.location.reload()}
-                                    style={{ fontSize: 13, color: "#6B7280", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontFamily: "'DM Sans',sans-serif" }}
+                                    style={{ fontSize: 14, color: "#6B7280", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontWeight: 500 }}
                                 >
-                                    Try again
+                                    Reconnect to system
                                 </button>
                             </div>
                         ) : filteredDecisions.length === 0 ? (
                             <div className="empty-state">
-                                <div style={{ width: 52, height: 52, borderRadius: 16, background: "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                                    <ExternalLink style={{ width: 22, height: 22, color: "#9CA3AF" }} />
+                                <div style={{ width: 64, height: 64, borderRadius: 20, background: "#F3F4F6", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+                                    <History style={{ width: 28, height: 28, color: "#9CA3AF" }} />
                                 </div>
-                                <h3 className="dash-serif" style={{ fontSize: 22, fontWeight: 700, color: "#1C1917", marginBottom: 8 }}>No reviews found</h3>
-                                <p style={{ color: "#9CA3AF", fontSize: 14, maxWidth: 320, lineHeight: 1.6, marginBottom: 28 }}>
-                                    {searchQuery ? `No results for "${searchQuery}". Try a different search.` : "You haven't submitted any architectural designs for review yet."}
+                                <h3 className="dash-serif" style={{ fontSize: 24, fontWeight: 700, color: "#1C1917", marginBottom: 12 }}>No Records Found</h3>
+                                <p style={{ color: "#9CA3AF", fontSize: 15, maxWidth: 360, lineHeight: 1.6, marginBottom: 32 }}>
+                                    {searchQuery ? `No matches for "${searchQuery}". Try refining your search parameters.` : "Your architectural decision log is currently empty. Start by submitting a design for review."}
                                 </p>
-                                <Link href="/review/new">
-                                    <button style={{ padding: "12px 28px", borderRadius: 14, background: "#1C1917", color: "white", fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer", fontFamily: "'DM Sans',sans-serif", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }}>
-                                        Start Your First Review
+                    <Link href="/review/new">
+                                    <button style={{ padding: "14px 32px", borderRadius: 16, background: "#1C1917", color: "white", fontWeight: 700, fontSize: 15, border: "none", cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.15)", transition: "all 0.2s" }}>
+                                        Initialize First Review
                                     </button>
                                 </Link>
                             </div>
@@ -402,60 +452,63 @@ export default function DashboardPage() {
                             filteredDecisions.map((decision, i) => {
                                 const status = getStatusDetails(decision.status)
                                 return (
-                                    <motion.div
-                                        key={decision.id}
-                                        initial={{ opacity: 0, y: 12 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: i * 0.07, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                                        className="review-row"
-                                    >
-                                        {/* Left: icon + info */}
-                                        <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
-                                            <div style={{
-                                                width: 42, height: 42, borderRadius: 12, flexShrink: 0,
-                                                background: status.bg,
-                                                border: `1px solid ${status.border}`,
-                                                display: "flex", alignItems: "center", justifyContent: "center"
-                                            }}>
-                                                <status.icon style={{ width: 18, height: 18, color: status.color }} />
-                                            </div>
-                                            <div style={{ minWidth: 0 }}>
-                                                <p style={{ fontSize: 15, fontWeight: 600, color: "#1C1917", marginBottom: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                                    {decision.title}
-                                                </p>
-                                                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#9CA3AF" }}>
-                                                    <span>{formatDate(decision.created_at)}</span>
-                                                    <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#D1D5DB", display: "inline-block" }} />
-                                                    <span style={{ color: status.color, fontWeight: 600 }}>{status.label}</span>
+                                    <Link href={`/dashboard/${decision.id}`} key={decision.id} style={{ textDecoration: "none" }}>
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 16 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: i * 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                                            className="review-row"
+                                            style={{ cursor: "pointer" }}
+                                        >
+                                            {/* Left: icon + info */}
+                                            <div style={{ display: "flex", alignItems: "center", gap: 16, minWidth: 0, flex: 1 }}>
+                                                <div style={{
+                                                    width: 46, height: 46, borderRadius: 14, flexShrink: 0,
+                                                    background: status.bg,
+                                                    border: `1px solid ${status.border}`,
+                                                    display: "flex", alignItems: "center", justifyContent: "center"
+                                                }}>
+                                                    <status.icon style={{ width: 20, height: 20, color: status.color }} />
+                                                </div>
+                                                <div style={{ minWidth: 0 }}>
+                                                    <p style={{ fontSize: 16, fontWeight: 600, color: "#1C1917", marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                                        {decision.title}
+                                                    </p>
+                                                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                                                        <span style={{ fontSize: 13, color: "#9CA3AF" }}>{formatDate(decision.created_at)}</span>
+                                                        <span style={{ width: 4, height: 4, borderRadius: "50%", background: "#D1D5DB" }} />
+                                                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                                            <span style={{ fontSize: 12, fontWeight: 700, color: status.color, textTransform: "uppercase", letterSpacing: "0.05em" }}>{status.label}</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        {/* Right: actions */}
-                                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                                            <Link href={`/dashboard/${decision.id}`} className="detail-btn">
-                                                View Details
-                                            </Link>
-                                            <Link href={`/dashboard/${decision.id}`}>
-                                                <button style={{
-                                                    width: 34, height: 34, borderRadius: 9,
-                                                    background: "#F9F8FF", border: "1px solid rgba(124,58,237,0.15)",
+                                            {/* Right: actions */}
+                                            <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+                                                <div className="detail-btn" style={{ padding: "10px 18px" }}>
+                                                    View Analysis
+                                                </div>
+                                                <div style={{
+                                                    width: 40, height: 40, borderRadius: 12,
+                                                    background: "white", border: "1px solid rgba(0,0,0,0.08)",
                                                     display: "flex", alignItems: "center", justifyContent: "center",
-                                                    cursor: "pointer", color: "#7C3AED", transition: "all 0.15s"
+                                                    color: "#1C1917", transition: "all 0.2s",
+                                                    boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
                                                 }}>
-                                                    <ChevronRight style={{ width: 15, height: 15 }} />
-                                                </button>
-                                            </Link>
-                                        </div>
-                                    </motion.div>
+                                                    <ChevronRight style={{ width: 18, height: 18 }} />
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    </Link>
                                 )
                             })
                         )}
 
                         {!isLoading && !error && filteredDecisions.length > 0 && (
-                            <div style={{ display: "flex", justifyContent: "center", paddingTop: 16 }}>
+                            <div style={{ display: "flex", justifyContent: "center", paddingTop: 24 }}>
                                 <button className="load-more">
-                                    Load more results
+                                    Show older records
                                     <ChevronRight style={{ width: 14, height: 14 }} />
                                 </button>
                             </div>
@@ -463,54 +516,56 @@ export default function DashboardPage() {
                     </div>
 
                     {/* ── Sidebar ── */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 16, position: "sticky", top: 100 }}>
+                    <div className="sidebar-container" style={{ display: "flex", flexDirection: "column", gap: 20, position: "sticky", top: 100 }}>
 
                         {/* Summary card */}
-                        <div className="dash-card" style={{ padding: "20px 22px" }}>
-                            <p className="section-label">Summary</p>
-                            <div>
+                        <div className="dash-card" style={{ padding: "24px" }}>
+                            <p className="section-label">System Metrics</p>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                                 {[
                                     { label: "Total Reviews", value: isLoading ? "—" : totalReviews, color: "#1C1917" },
                                     { label: "Critical Risks", value: isLoading ? "—" : criticalRisks, color: "#DC2626" },
-                                    { label: "Approved", value: isLoading ? "—" : approved, color: "#059669" },
+                                    { label: "Healthy Designs", value: isLoading ? "—" : approved, color: "#059669" },
                                 ].map(({ label, value, color }) => (
-                                    <div key={label} className="summary-row">
-                                        <span style={{ fontSize: 13, color: "#6B7280" }}>{label}</span>
-                                        <span className="dash-serif" style={{ fontSize: 18, fontWeight: 700, color }}>{value}</span>
+                                    <div key={label} className="summary-row" style={{ padding: "12px 0" }}>
+                                        <span style={{ fontSize: 14, color: "#6B7280", fontWeight: 500 }}>{label}</span>
+                                        <span className="dash-serif" style={{ fontSize: 20, fontWeight: 700, color }}>{value}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
                         {/* Tip card */}
-                        <div className="tip-card">
-                            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                                <div style={{ width: 30, height: 30, borderRadius: 8, background: "rgba(124,58,237,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                    <History style={{ width: 14, height: 14, color: "#7C3AED" }} />
+                        <div className="tip-card" style={{ padding: "24px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                                <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(124,58,237,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    <Sparkles style={{ width: 16, height: 16, color: "#7C3AED" }} />
                                 </div>
-                                <span style={{ fontSize: 13, fontWeight: 600, color: "#4C1D95" }}>Quick Tip</span>
+                                <span style={{ fontSize: 14, fontWeight: 600, color: "#4C1D95" }}>Architecture Tip</span>
                             </div>
-                            <p style={{ fontSize: 13, color: "#6B7280", lineHeight: 1.65 }}>
-                                Referencing past decisions helps maintain architectural consistency and avoids repeating historical mistakes.
+                            <p style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.7 }}>
+                                High risk levels often correlate with tightly coupled services. Consider using message queues for cross-domain communication.
                             </p>
                         </div>
 
                         {/* Accent strip */}
-                        <div style={{ borderRadius: 16, background: "linear-gradient(135deg,#7C3AED,#9333EA)", padding: "20px 22px", color: "white" }}>
-                            <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 6, opacity: 0.9 }}>Architecture score</p>
-                            <p className="dash-serif" style={{ fontSize: 36, fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}>
-                                {isLoading ? "—" : approved > 0 ? Math.round((approved / totalReviews) * 100) : 0}
-                                <span style={{ fontSize: 18, opacity: 0.6 }}>%</span>
-                            </p>
-                            <div style={{ marginTop: 12, height: 5, borderRadius: 4, background: "rgba(255,255,255,0.2)", overflow: "hidden" }}>
+                        <div style={{ borderRadius: 24, background: "linear-gradient(135deg,#1C1917,#44403C)", padding: "28px 24px", color: "white", boxShadow: "0 10px 30px -10px rgba(0,0,0,0.3)" }}>
+                            <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 8, opacity: 0.7, textTransform: "uppercase", letterSpacing: "0.05em" }}>Global Compliance Score</p>
+                            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                                <p className="dash-serif" style={{ fontSize: 48, fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}>
+                                    {isLoading ? "—" : totalReviews > 0 ? Math.round((approved / totalReviews) * 100) : 0}
+                                </p>
+                                <span style={{ fontSize: 24, opacity: 0.5, fontWeight: 600 }}>%</span>
+                            </div>
+                            <div style={{ marginTop: 20, height: 6, borderRadius: 10, background: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: isLoading || totalReviews === 0 ? "0%" : `${Math.round((approved / totalReviews) * 100)}%` }}
-                                    transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                                    style={{ height: "100%", borderRadius: 4, background: "rgba(255,255,255,0.7)" }}
+                                    transition={{ duration: 1.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                                    style={{ height: "100%", borderRadius: 10, background: "linear-gradient(90deg, #A78BFA, #F472B6)" }}
                                 />
                             </div>
-                            <p style={{ fontSize: 11, opacity: 0.6, marginTop: 6 }}>Approved vs total reviews</p>
+                            <p style={{ fontSize: 12, opacity: 0.5, marginTop: 12, fontWeight: 500 }}>Calculated from {totalReviews} recent analyses</p>
                         </div>
                     </div>
                 </div>
